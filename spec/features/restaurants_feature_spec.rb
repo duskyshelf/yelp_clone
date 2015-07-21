@@ -22,23 +22,33 @@ feature 'restaurants' do
   end
 
   context 'creating restaurants' do
-    scenario 'prompts user to fill out a form, then displays the new restaurant' do
-      visit '/restaurants'
-      click_link 'Add a restaurant'
-      fill_in 'Name', with: 'KFC'
-      click_button 'Create Restaurant'
-      expect(page).to have_content 'KFC'
-      expect(current_path).to eq '/restaurants'
-    end
-    
-    context 'an invalid restaurant' do
-      it 'does not let you submit a name that is too short' do
-        visit '/restaurants'
+
+    context 'whilst logged in' do
+
+      before {
+        visit('/')
+        click_link('Sign up')
+        fill_in('Email', with: 'test@example.com')
+        fill_in('Password', with: 'testtest')
+        fill_in('Password confirmation', with: 'testtest')
+        click_button('Sign up')
         click_link 'Add a restaurant'
-        fill_in 'Name', with: 'kf'
+      }
+
+      scenario 'prompts user to fill out a form, then displays the new restaurant' do
+        fill_in 'Name', with: 'KFC'
         click_button 'Create Restaurant'
-        expect(page).not_to have_css 'h2', text: 'kf'
-        expect(page).to have_content 'error'
+        expect(page).to have_content 'KFC'
+        expect(current_path).to eq '/restaurants'
+      end
+
+      context 'an invalid restaurant' do
+        it 'does not let you submit a name that is too short' do
+          fill_in 'Name', with: 'kf'
+          click_button 'Create Restaurant'
+          expect(page).not_to have_css 'h2', text: 'kf'
+          expect(page).to have_content 'error'
+        end
       end
     end
   end
