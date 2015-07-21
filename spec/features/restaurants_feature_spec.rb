@@ -51,6 +51,15 @@ feature 'restaurants' do
         end
       end
     end
+
+    context 'whilst logged out' do
+
+      scenario "doesn't allow user to create new restaurant" do
+        visit '/'
+        click_link 'Add a restaurant'
+        expect(page).to have_content 'You need to sign in or sign up before continuing.'
+      end
+    end
   end
 
   context 'viewing restaurants' do
@@ -66,27 +75,49 @@ feature 'restaurants' do
 
   context 'editing restaurants' do
 
-    before {Restaurant.create name: 'KFC'}
+    context 'whilst logged in' do
 
-    scenario 'let a user edit a restaurant' do
-      visit '/restaurants'
-      click_link 'Edit KFC'
-      fill_in 'Name', with: 'Kentucky Fried Chicken'
-      click_button 'Update Restaurant'
-      expect(page).to have_content 'Kentucky Fried Chicken'
-      expect(current_path).to eq '/restaurants'
+      before { Restaurant.create name: 'KFC'
+               visit('/')
+               click_link('Sign up')
+               fill_in('Email', with: 'test@example.com')
+               fill_in('Password', with: 'testtest')
+               fill_in('Password confirmation', with: 'testtest')
+               click_button('Sign up')
+               click_link 'Add a restaurant'
+             }
+
+      scenario 'let a user edit a restaurant' do
+        visit '/restaurants'
+        click_link 'Edit KFC'
+        fill_in 'Name', with: 'Kentucky Fried Chicken'
+        click_button 'Update Restaurant'
+        expect(page).to have_content 'Kentucky Fried Chicken'
+        expect(current_path).to eq '/restaurants'
+      end
     end
   end
 
   context 'deleting restaurants' do
 
-    before {Restaurant.create name: 'KFC'}
+    context 'whilst logged in' do
 
-    scenario 'removes a restaurant when a user clicks a delete link' do
-      visit '/restaurants'
-      click_link 'Delete KFC'
-      expect(page).not_to have_content 'KFC'
-      expect(page).to have_content 'Restaurant deleted successfully'
+      before { Restaurant.create name: 'KFC'
+               visit('/')
+               click_link('Sign up')
+               fill_in('Email', with: 'test@example.com')
+               fill_in('Password', with: 'testtest')
+               fill_in('Password confirmation', with: 'testtest')
+               click_button('Sign up')
+               click_link 'Add a restaurant'
+             }
+
+      scenario 'removes a restaurant when a user clicks a delete link' do
+        visit '/restaurants'
+        click_link 'Delete KFC'
+        expect(page).not_to have_content 'KFC'
+        expect(page).to have_content 'Restaurant deleted successfully'
+      end
     end
   end
 end
